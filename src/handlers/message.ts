@@ -3,18 +3,16 @@ import { insertLead } from '../db';
 
 export async function handleIncomingMessage(msg: Message): Promise<void> {
     try {
-        const phoneNumber = msg.from; // Usually in format '1234567890@c.us'
-        const messageBody = msg.body;
+        const contact = await msg.getContact();
+        const phoneNumber = contact.number;
+        const name = contact.name || contact.pushname || null;
 
         // Skip status broadcasts
         if (phoneNumber === 'status@broadcast') return;
 
-        // Extract phone number by removing the @c.us suffix
-        const formattedPhone = phoneNumber.split('@')[0];
-
-        console.log(`Received message from ${formattedPhone}: ${messageBody}`);
+        console.log(`Received message from ${name ? name : phoneNumber}: ${msg.body}`);
         
-        await insertLead(formattedPhone, messageBody);
+        await insertLead(phoneNumber, name);
     } catch (error) {
         console.error('Error handling incoming message:', error);
     }
