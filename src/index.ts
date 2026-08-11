@@ -10,6 +10,14 @@ async function bootstrap() {
         console.log('Launching interactive menu...');
         await showMenu();
 
+        // Ignore unhandled puppeteer TargetCloseErrors that happen during teardown
+        process.on('unhandledRejection', (reason: any) => {
+            if (reason && reason.name === 'TargetCloseError') {
+                return;
+            }
+            console.error('Unhandled Rejection:', reason);
+        });
+
         // Handle graceful shutdown to prevent zombie browser processes
         process.on('SIGINT', async () => {
             console.log('\nGracefully shutting down WhatsApp client...');

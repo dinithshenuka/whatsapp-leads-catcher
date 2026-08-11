@@ -16,6 +16,11 @@ export const whatsappClient = new Client({
     }
 });
 
+whatsappClient.on('disconnected', (reason) => {
+    console.error('\n[!] WhatsApp Client was disconnected! Reason:', reason);
+    console.error('[!] If you were logged out, you may need to restart the CLI to scan a new QR code.\n');
+});
+
 export function initializeWhatsAppClient(): void {
     whatsappClient.on('qr', (qr: string) => {
         console.log('Please scan the QR code below to authenticate:');
@@ -99,7 +104,9 @@ export async function runHistoricalScraper(days: number | null): Promise<void> {
                             if (chat.isGroup) return null;
                             
                             let phoneNumber = null;
-                            if (chat.id && chat.id.user) {
+                            if (chat.contact && chat.contact.userid) {
+                                phoneNumber = '+' + chat.contact.userid;
+                            } else if (chat.id && chat.id.user) {
                                 phoneNumber = '+' + chat.id.user;
                             }
                             
@@ -167,7 +174,8 @@ export async function runHistoricalScraper(days: number | null): Promise<void> {
             if (page) {
                 try {
                     // Manually wait for the chat list to appear, bypassing the flaky 'ready' event
-                    await page.waitForSelector('#pane-side', { timeout: 60000 });
+                    // Increased timeout to 120s as WhatsApp Web synchronization can sometimes take longer.
+                    await page.waitForSelector('#pane-side', { timeout: 120000 });
                     await performScraping();
                 } catch (err) {
                     console.error('Timed out waiting for WhatsApp UI to load. Is it stuck on a loading screen?');
