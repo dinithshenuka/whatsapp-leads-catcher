@@ -1,13 +1,14 @@
-import { initDb } from './db';
+import { initDb } from './database';
 import { initializeWhatsAppClient, whatsappClient } from './services/whatsapp';
+import { showMenu } from './cli';
 
 async function bootstrap() {
     try {
         console.log('Initializing database...');
         await initDb();
 
-        console.log('Initializing WhatsApp client...');
-        initializeWhatsAppClient();
+        console.log('Launching interactive menu...');
+        await showMenu();
 
         // Handle graceful shutdown to prevent zombie browser processes
         process.on('SIGINT', async () => {
