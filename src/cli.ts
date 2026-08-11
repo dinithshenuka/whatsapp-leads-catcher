@@ -1,6 +1,6 @@
 import inquirer from 'inquirer';
 import { initializeWhatsAppClient, runHistoricalScraper, whatsappClient } from './services/whatsapp';
-import { printLeadsTable } from './database/leads';
+import { printLeadsTable, exportLeadsToCSV } from './database/leads';
 
 export async function showMenu() {
     console.log('\n=======================================');
@@ -17,6 +17,7 @@ export async function showMenu() {
                 { name: 'Scrape Historical Leads', value: 'scrape_leads' },
                 { name: 'View All Leads', value: 'view_leads' },
                 { name: 'View Leads by Time Period', value: 'view_leads_period' },
+                { name: 'Export Leads to CSV', value: 'export_csv' },
                 { name: 'Exit', value: 'exit' }
             ]
         }
@@ -82,6 +83,27 @@ export async function showMenu() {
             ]);
             await printLeadsTable(parseInt(period));
             // Show menu again after viewing
+            console.log('\n');
+            await showMenu();
+            break;
+            
+        case 'export_csv':
+            const { exportPeriod } = await inquirer.prompt([
+                {
+                    type: 'list',
+                    name: 'exportPeriod',
+                    message: 'Select time period to export:',
+                    choices: [
+                        { name: 'Last 24 Hours', value: '1' },
+                        { name: 'Last 7 Days', value: '7' },
+                        { name: 'Last 30 Days', value: '30' },
+                        { name: 'All Time', value: 'all' }
+                    ]
+                }
+            ]);
+            const daysToExport = exportPeriod === 'all' ? undefined : parseInt(exportPeriod);
+            await exportLeadsToCSV(daysToExport);
+            
             console.log('\n');
             await showMenu();
             break;
