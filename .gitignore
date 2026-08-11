@@ -20,3 +20,6 @@ leads.db-journal
 # Build output
 dist/
 build/
+
+# Exports
+exports/

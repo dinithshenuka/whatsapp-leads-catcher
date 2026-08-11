@@ -91,8 +91,17 @@ export function exportLeadsToCSV(days?: number): Promise<void> {
                 }
                 
                 const csvString = csvRows.join('\n');
+                const exportDir = path.join(process.cwd(), 'exports');
+                
+                // Create exports directory if it doesn't exist
+                try {
+                    await fs.access(exportDir);
+                } catch {
+                    await fs.mkdir(exportDir);
+                }
+                
                 const filename = `leads_export_${new Date().toISOString().replace(/[:.]/g, '-')}.csv`;
-                const filepath = path.join(process.cwd(), filename);
+                const filepath = path.join(exportDir, filename);
                 
                 await fs.writeFile(filepath, csvString, 'utf-8');
                 console.log(`\nSuccessfully exported ${rows.length} leads to: ${filename}`);
